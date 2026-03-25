@@ -1,0 +1,44 @@
+[package]
+name = "cachekit"
+version = "0.1.0"
+edition = "2021"
+authors = ["Phenotype Team"]
+description = "Universal caching abstraction with TTL and multi-backend support"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/KooshaPari/cachekit"
+documentation = "https://docs.rs/cachekit"
+keywords = ["cache", "caching", "memory", "redis", "ttl"]
+categories = ["caching", "data-structures"]
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# LRU cache
+lru = "0.12"
+
+# HashMap for hashing
+hashlink = "0.8"
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.8"
+
+[profile.release]
+lto = true
+codegen-units = 1
