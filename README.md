@@ -1,53 +1,69 @@
-# cachekit
+# Stashly
 
-**Universal caching abstraction with TTL, invalidation, and multi-backend support.**
+**Universal caching abstraction with TTL, multi-tier, singleflight, and multi-backend support.**
 
-A hexagonal architecture-based caching framework supporting:
+A hexagonal architecture-based caching framework that absorbs thegent-cache.
+
+## Features
 
 - **Multiple Backends**: Memory, Redis, Memcached, Disk
+- **Multi-Tier Caching**: L1 (LRU) + L2 (concurrent) + L3 (persistent)
+- **Singleflight**: Deduplicate concurrent requests for the same key
 - **TTL Support**: Automatic expiration with configurable duration
+- **CQRS**: Separate command and query interfaces
+- **Domain Events**: Cache operation events for observability
 - **Invalidation Strategies**: LRU, LFU, TTL-based
 - **Async/Await**: Full async support with tokio
 - **Serialization**: Automatic serialization of cached values
-- **Metrics**: Hit/miss rates, latency tracking
+- **Metrics**: Hit/miss rates, latency tracking, per-tier statistics
+
+## Absorbed Projects
+
+- **thegent-cache** — Multi-tier caching (L1/L2), singleflight support, CQRS, domain events
 
 ## Architecture
 
 ```
-cachekit/
+Stashly/
 ├── src/
 │   ├── domain/          # Core domain logic (pure)
-│   │   ├── cache/     # Cache entities
-│   │   ├── policy/    # Eviction policies
-│   │   ├── ports/     # Interface definitions
-│   │   └── errors/    # Domain errors
-│   ├── application/    # Application services
-│   │   └── services/  # Cache service
-│   ├── adapters/      # Backend adapters
-│   │   ├── memory/   # In-memory cache
-│   │   ├── redis/    # Redis backend
-│   │   └── metrics/  # Metrics adapter
-│   └── infrastructure/ # Cross-cutting concerns
-├── tests/             # Integration tests
-├── examples/          # Usage examples
-└── benches/           # Benchmarks
+│   │   ├── cache/       # Cache entities (original)
+│   │   ├── entities/    # Domain entities (from thegent-cache)
+│   │   ├── events/      # Domain events (from thegent-cache)
+│   │   ├── value_objects/ # Value objects (from thegent-cache)
+│   │   ├── policy/      # Eviction policies
+│   │   ├── ports/       # Interface definitions
+│   │   └── errors/      # Domain errors
+│   ├── application/     # Application services (CQRS)
+│   ├── adapters/        # Backend adapters
+│   │   ├── memory/     # In-memory cache (original)
+│   │   ├── tiered/     # L1/L2 tiered cache (from thegent-cache)
+│   │   └── redis/      # Redis backend
+│   ├── ports/           # Hexagonal ports (from thegent-cache)
+│   └── infrastructure/  # Cross-cutting concerns
+├── tests/               # Integration tests
+├── examples/            # Usage examples
+└── benches/             # Benchmarks
 ```
 
-## Features
+## Quick Start
 
-- [x] In-memory cache with LRU eviction
-- [x] TTL support
-- [x] Async operations
-- [x] Serialization support
-- [x] Metrics collection
-- [ ] Redis backend
-- [ ] Memcached backend
-- [ ] Distributed cache
-- [ ] Cache warming
+```rust
+use stashly::{InMemoryCache, TieredCache, CachePort, CacheWritePort};
+
+// Simple in-memory cache
+let cache = InMemoryCache::new();
+
+// Tiered cache (L1 + L2)
+let tiered = TieredCache::with_config(1000, 10000, std::time::Duration::from_secs(3600));
+```
 
 ## Installation
 
 ```toml
+[dependencies]
+stashly = { git = "https://github.com/KooshaPari/Stashly" }
+```
 [dependencies]
 cachekit = "0.1"
 ```
@@ -71,3 +87,7 @@ let value = cache.get("key").await?;
 ## License
 
 MIT OR Apache-2.0
+
+/// @trace STASH-001
+
+/// @trace STASH-001
