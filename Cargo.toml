@@ -43,3 +43,7 @@ tempfile = "3"
 [profile.release]
 lto = true
 codegen-units = 1
+
+[[bench]]
+name = "perf"
+harness = false
